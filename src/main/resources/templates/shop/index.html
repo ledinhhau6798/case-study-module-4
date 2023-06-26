@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Shopping</title>
+    <th:block th:replace="/dashboard/layout/head" />
+    <style>
+        .content {
+            padding: 10px;
+        }
+
+        .product-carts {
+            justify-content: space-between;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .product-price-unit {
+            display: flex;
+            justify-content: space-between;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .product-cart {
+            margin: 5px;
+            float: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <th:block th:replace="/shop/header" />
+
+        <div class="content">
+            <div id="product-carts" class="row product-carts">
+<!--                <div class="card product-cart col-lg-2">-->
+<!--                    <img src="https://res.cloudinary.com/toanphat/image/upload/c_scale,w_280,h_180,q_90/c0123_product_images/c690c830-28b7-4bc7-911e-83c408c85d83.jpg" class="card-img-top" alt="...">-->
+<!--                    <div class="card-body">-->
+<!--                        <h5 class="card-title">Card title</h5>-->
+<!--                        <div class="product-price-unit mb-2">-->
+<!--                            <span>300.000 đ</span>-->
+<!--                            <span>Thùng</span>-->
+<!--                        </div>-->
+<!--                        <button class="btn btn-outline-primary">Add to cart</button>-->
+<!--                    </div>-->
+<!--                </div>-->
+            </div>
+        </div>
+
+    </div>
+
+    <script src="/assets/jquery/jquery-3.7.0.min.js"></script>
+    <script src="/assets/jquery/jquery.validate.min.js"></script>
+    <script src="/assets/bootstrap/v-5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/sweetalert2/sweetalert2.all.min.js"></script>
+
+    <script src="/assets/js/appBase.js"></script>
+
+    <script>
+        const page = {
+            urls: {
+                getAllCategories: AppBase.API_CATEGORY,
+                getAllProducts: AppBase.API_PRODUCT,
+                getAllCartDetails: AppBase.API_CART,
+                addToCart: AppBase.API_CART + '/add-to-cart'
+            },
+            elements: {},
+            commands: {},
+            dialogs: {
+                elements: {},
+                commands: {}
+            },
+        }
+
+        page.elements.productCarts = $('#product-carts');
+        page.elements.totalQuantity = $('#totalQuantity');
+
+        page.commands.getAllProducts = () => {
+            $.ajax({
+                type: 'GET',
+                url: page.urls.getAllProducts
+            })
+                .done((data) => {
+                    $.each(data, (index, item) => {
+                        const str = page.commands.renderProduct(item);
+
+                        page.elements.productCarts.prepend(str)
+                    })
+
+                    page.commands.handleAddToCart();
+                })
+                .fail((jqXHR) => {
+                    console.log(jqXHR)
+                })
+        }
+
+        page.commands.renderProduct = (obj) => {
+            const imageUrl = AppBase.DOMAIN_CLOUDINARY + '/' + AppBase.IMAGE_SCALE_W_280_h_180_Q_100 + '/' + obj.avatar.fileFolder + '/' + obj.avatar.fileName;
+
+            return `
+                <div class="card product-cart col-lg-2">
+                    <img src="${imageUrl}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">${obj.title}</h5>
+                        <div class="product-price-unit mb-2">
+                            <span>${obj.price} đ</span>
+                            <span>${obj.unit}</span>
+                        </div>
+                        <button class="btn btn-outline-primary add-to-cart" data-product-id="${obj.id}">Add to cart</button>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        page.commands.getAllCartDetails = () => {
+            $.ajax({
+                type: 'GET',
+                url: page.urls.getAllCartDetails
+            })
+                .done((data) => {
+
+                    if (data !== null) {
+                        $.each(data, (index, item) => {
+                            let totalQuantity = 0;
+                            $.each(data, (index, item) => {
+                                totalQuantity += item.quantity;
+                            })
+
+                            page.elements.totalQuantity.text(totalQuantity);
+                        })
+                    }
+                })
+                .fail((jqXHR) => {
+                    console.log(jqXHR)
+                })
+        }
+
+        page.commands.handleAddToCart = () => {
+            $('.add-to-cart').on('click', function () {
+                const productId = $(this).data('product-id');
+                const quantity = 1;
+
+                const obj = {
+                    productId,
+                    quantity
+                }
+
+                page.commands.addToCart(obj);
+
+            })
+        }
+
+        page.commands.addToCart = (obj) => {
+            $.ajax({
+                headers: {
+                    'accept': 'application/json',
+                    'content-type': 'application/json'
+                },
+                type: 'POST',
+                url: page.urls.addToCart,
+                data: JSON.stringify(obj)
+            })
+                .done((data) => {
+                    let totalQuantity = 0;
+                    $.each(data, (index, item) => {
+                        totalQuantity += item.quantity;
+                    })
+
+                    page.elements.totalQuantity.text(totalQuantity);
+                })
+                .fail((jqXHR) => {
+                    alert('error')
+                })
+        }
+
+        page.loadData = () => {
+            page.commands.getAllProducts();
+
+            // page.commands.getAllCartDetails();
+        }
+
+        page.initializeControlEvent = () => {
+
+        }
+
+        $(() => {
+            page.loadData();
+
+            page.initializeControlEvent();
+        })
+
+        window.onload = () => {
+
+        }
+    </script>
+</body>
+</html>

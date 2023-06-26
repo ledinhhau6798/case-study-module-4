@@ -1,0 +1,95 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<th:block th:fragment="modalCreateProduct">
+
+    <div id="modalCreateProduct" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modal create product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-alert-danger hide"></div>
+                    <form id="frmCreateProduct" enctype="multipart/form-data">
+                        <fieldset class="row g-3">
+                            <div class="mb-3 col-md-6">
+                                <div class="form-group row">
+                                    <label class="col-sm-12 col-form-label">Title</label>
+                                    <div class="col-sm-12">
+                                        <input type="text" id="productTitleCre" name="productTitleCre" class="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-lg-4">
+                                        <label class="col-sm-12 col-form-label">Price</label>
+                                        <div class="col-sm-12">
+                                            <input type="number" id="productPriceCre" name="productPriceCre" class="form-control"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <label class="col-sm-12 col-form-label">Unit</label>
+                                        <div class="col-sm-12">
+                                            <input type="text" id="productUnitCre" name="productUnitCre" class="form-control"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <label class="col-sm-12 col-form-label">Category</label>
+                                        <div class="col-sm-12">
+                                            <select id="productCategoryCre" class="form-select">
+
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-12 col-form-label">Description</label>
+                                    <div class="col-sm-12">
+                                        <input type="text" class="form-control" id="productDescriptionCre" name="productDescriptionCre"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <section>
+                                    <div class="wrapper">
+                                        <div class="image-preview">
+                                            <canvas id="canvasCre"></canvas>
+                                        </div>
+                                        <div class="content">
+                                            <div class="icon">
+                                                <i class="fas fa-cloud-upload-alt"></i>
+                                            </div>
+                                            <div class="text">
+                                                No file chosen, yet!
+                                            </div>
+                                            <div class="text">
+                                                Max file size = 2MB
+                                            </div>
+                                        </div>
+                                        <div class="clear-image-preview">
+                                            <i class="fas fa-times"></i>
+                                        </div>
+                                        <div class="file-name">
+                                            Change image
+                                        </div>
+                                    </div>
+                                    <input type="file" id="imageFileCre" accept="image/jpeg, image/png" hidden multiple/>
+                                </section>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <th:block th:if="${roleCode == 'ADMIN'}">
+                        <button type="button" id="btnCreate" class="btn btn-outline-success">
+                            <i class="fa fa-plus"></i>
+                            Create
+                        </button>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>

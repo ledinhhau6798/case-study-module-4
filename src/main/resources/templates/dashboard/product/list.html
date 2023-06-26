@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>List of customers</title>
+    <th:block th:replace="/dashboard/layout/head"/>
+</head>
+
+<body>
+<div class="container-fluid">
+    <th:block th:replace="/dashboard/product/header"/>
+
+    <div class="content">
+        <table id="tbProduct" class="table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Title</th>
+                <th scope="col">Image</th>
+                <th scope="col">Price</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Description</th>
+                <th scope="col">Category</th>
+                <th scope="col">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+    <th:block th:replace="dashboard/product/modalCreateProduct"/>
+    <th:block th:replace="dashboard/product/modal-update"/>
+</div>
+
+<div class="loader hide"></div>
+
+<footer class="container-fluid hide">
+</footer>
+
+
+<script src="/assets/jquery/jquery-3.7.0.min.js"></script>
+<script src="/assets/jquery/jquery.validate.min.js"></script>
+<script src="/assets/bootstrap/v-5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/sweetalert2/sweetalert2.all.min.js"></script>
+
+<script src="/assets/js/appBase.js"></script>
+
+<script>
+    const page = {
+        url: {
+            getAllCategories: AppBase.API_CATEGORY,
+            getAllProducts: AppBase.API_PRODUCT,
+            doCreate: AppBase.API_PRODUCT,
+            doUpdate: AppBase.API_UPDATE_PRODUCT,
+            doDelete: AppBase.API_DELETE_PRODUCT
+        },
+        elements: {},
+        commands: {},
+        dialogs: {
+            elements: {},
+            commands: {}
+        },
+    }
+
+    page.elements.tbProductBody = $('#tbProduct tbody')
+
+    page.dialogs.elements.modalCreateProduct = $('#modalCreateProduct')
+    page.dialogs.elements.frmCreateProduct = $('#frmCreateProduct')
+    page.dialogs.elements.productTitleCre = $('#productTitleCre')
+    page.dialogs.elements.productPriceCre = $('#productPriceCre')
+    page.dialogs.elements.productCategoryCre = $('#productCategoryCre')
+    page.dialogs.elements.productDescriptionCre = $('#productDescriptionCre')
+    page.dialogs.elements.productUnitCre = $('#productUnitCre')
+
+    page.dialogs.elements.canvasCre = $('#canvasCre')
+    page.dialogs.elements.context = page.dialogs.elements.canvasCre[0].getContext('2d');
+    page.dialogs.elements.wrapper = $("section .wrapper");
+    page.dialogs.elements.wrapperContent = $("section .wrapper .content");
+    page.dialogs.elements.imagePreview = $("section .image-preview canvas");
+    page.dialogs.elements.imageFileCre = $('#imageFileCre')
+    page.dialogs.elements.imageFileUpdate = $("#imageFileUpdate");
+
+    page.dialogs.elements.btnCreate = $('#btnCreate')
+
+
+    page.elements.btnShowUpdateForm = $("#update-modal");
+    page.dialogs.elements.frmUpdateCustomer = $('#frmUpdateProduct');
+    page.dialogs.elements.modalUpdate = $('#mdUpdate')
+    page.dialogs.elements.errorUpdateArea = $('#mdUpdate .modal-body .modal-alert-danger')
+    page.dialogs.elements.productTitleUP = $('#productTitleUP')
+    page.dialogs.elements.productQuantityUp = $('#productQuantityUp')
+    page.dialogs.elements.productPriceUp = $('#productPriceUp')
+    page.dialogs.elements.productUnitUp = $('#productUnitUp')
+    page.dialogs.elements.descriptionUp = $('#descriptionUp')
+    page.dialogs.elements.btnUpdate = $('#btnUpdate')
+    page.dialogs.elements.categorySelectUpdate = $('#categorySelectUpdate')
+    page.dialogs.elements.divImagePreviewUpdate = $("#mdUpdate div.image-preview, #mdUpdate div.file-name")
+
+
+    let productId = 0;
+
+    let product = new Product();
+    let avatar = new Avatar();
+
+    page.commands.getAllProducts = () => {
+        $.ajax({
+            type: 'GET',
+            url: page.url.getAllProducts
+        })
+            .done((data) => {
+                $.each(data, (index, item) => {
+                    const str = page.commands.renderProduct(item);
+
+                    page.elements.tbProductBody.prepend(str)
+                })
+            })
+            .fail((jqXHR) => {
+                console.log(jqXHR)
+            })
+    }
+
+    page.commands.getProductById = (productId) => {
+        return $.ajax({
+            type: 'GET',
+            url: page.url.getAllProducts + '/' + productId
+        });
+    }
+
+    page.commands.getAllCategories = () => {
+        $.ajax({
+            type: 'GET',
+            url: page.url.getAllCategories
+        })
+            .done((data) => {
+                $.each(data, (index, item) => {
+                    const str = page.commands.renderCategory(item);
+
+                    page.dialogs.elements.productCategoryCre.append(str)
+                })
+            })
+            .fail((jqXHR) => {
+                console.log(jqXHR)
+            })
+    }
+
+    page.commands.renderCategory = (obj) => {
+        return `<option value="${obj.id}">${obj.title}</option>`
+    }
+
+    page.commands.renderProduct = (obj) => {
+        const imageUrl = AppBase.DOMAIN_CLOUDINARY + '/' + AppBase.IMAGE_SCALE_W_80_h_60_Q_90 + '/' + obj.avatar.fileFolder + '/' + obj.avatar.fileName;
+        return `
+                <tr  id="tr_{0}">
+                    <td>${obj.id}</td>
+                    <td>${obj.title}</td>
+                    <td>
+                        <img class="product-avatar" src="${imageUrl}" alt="">
+                    </td>
+                    <td>${obj.price}</td>
+                    <td>${obj.quantity}</td>
+                    <td>${obj.description}</td>
+                    <td>${obj.categoryTitle}</td>
+                    <td class="text-center">
+                <a class="btn btn-outline-primary update-modal" data-id="{0}" >
+                    <i class="fas fa-user-edit"></i>
+                    Edit
+                </a>
+                <a class="btn btn-outline-danger delete" data-id="{0}" >
+                    <i class="far fa-trash-alt"></i>
+                    Delete
+                </a>
+            </td>
+                </tr>
+            `;
+    }
+
+
+    page.dialogs.commands.loadImageToCanvas = (imageFile) => {
+        page.dialogs.elements.imagePreview.css("display", "");
+        page.dialogs.elements.wrapper.addClass("active");
+        page.dialogs.elements.wrapperContent.css("opacity", 0);
+
+        let imageObj = new Image();
+
+        imageObj.onload = function () {
+            page.dialogs.elements.context.canvas.width = imageObj.width;
+            page.dialogs.elements.context.canvas.height = imageObj.height;
+            page.dialogs.elements.context.drawImage(imageObj, 0, 0, imageObj.width, imageObj.height);
+        };
+
+        imageObj.src = URL.createObjectURL(imageFile)
+    }
+
+    page.dialogs.commands.handleCreateProduct = () => {
+        let formData = new FormData();
+        formData.append("title", page.dialogs.elements.productTitleCre.val());
+        formData.append("price", page.dialogs.elements.productPriceCre.val());
+        formData.append("description", page.dialogs.elements.productDescriptionCre.val());
+        formData.append("unit", page.dialogs.elements.productUnitCre.val());
+        formData.append("categoryId", +page.dialogs.elements.productCategoryCre.val());
+        formData.append("avatar", page.dialogs.elements.imageFileCre[0].files[0]);
+
+        page.dialogs.commands.doCreate(formData);
+    }
+
+    page.dialogs.commands.doCreate = (formData) => {
+        $.ajax({
+            type: "POST",
+            contentType: false,
+            cache: false,
+            processData: false,
+            url: page.url.doCreate,
+            data: formData
+        })
+            .done((data) => {
+                const str = page.commands.renderProduct(data);
+
+                page.elements.tbProductBody.prepend(str);
+
+                page.dialogs.elements.modalCreateProduct.modal('hide');
+            })
+            .fail((jqXHR) => {
+                console.log(jqXHR.status)
+                const statusCode = jqXHR.status;
+
+                if (statusCode === 403) {
+                    alert('Bạn không có quyền thực hiện chức năng này')
+                }
+            })
+    }
+
+
+    page.dialogs.elements.clearImagePreview = () => {
+        page.dialogs.elements.imageFileCre.val("");
+        page.dialogs.elements.imageFileUpdate.val("");
+        page.dialogs.elements.imagePreview.css("display", "none");
+        page.dialogs.elements.wrapper.removeClass("active");
+        page.dialogs.elements.wrapperContent.css("opacity", 1);
+    }
+
+    page.dialogs.commands.changeImagePreviewUpdate = () => {
+        let imageFile = page.dialogs.elements.imageFileUpdate[0].files[0];
+
+
+        if (imageFile) {
+            let reader = new FileReader();
+
+            reader.readAsDataURL(imageFile);
+
+            reader.onload = function (e) {
+                if (e.target.readyState === FileReader.DONE) {
+                    page.dialogs.commands.loadImageToCanvasUpdate(imageFile, "BINARY", null);
+                }
+            }
+        } else {
+            page.dialogs.elements.clearImagePreview();
+        }
+    }
+
+
+    page.dialogs.commands.loadImageToCanvasUpdate = (imageFile, fileType, imageUrl) => {
+        page.dialogs.elements.imagePreview.css("display", "");
+        page.dialogs.elements.wrapper.addClass("active");
+        page.dialogs.elements.wrapperContent.css("opacity", 0);
+
+        let imageObj = new Image();
+
+        imageObj.onload = function () {
+            page.dialogs.elements.context.canvas.width = imageObj.width;
+            page.dialogs.elements.context.canvas.height = imageObj.height;
+            page.dialogs.elements.context.drawImage(imageObj, 0, 0, imageObj.width, imageObj.height);
+
+        };
+
+        page.commands.showUpdateModal = () => {
+
+            page.elements.btnShowUpdateForm.on("click", function () {
+                page.commands.getAllCategories();
+                productId = $(this).data('id');
+                page.commands.getProductById(productId).then((data) => {
+                    if (data !== {}) {
+                        product = data;
+                        avatar = product.avatar;
+
+                        page.dialogs.elements.productTitleUP.val(product.title);
+                        page.dialogs.elements.productPriceUp.val(product.price);
+                        page.dialogs.elements.productUnitUp.val(product.unit);
+                        page.dialogs.elements.productQuantityUp.val(product.quantity);
+
+
+                        page.dialogs.elements.categorySelectUpdate.val(product.category.id);
+
+
+                        page.dialogs.elements.descriptionUp.val(product.description);
+
+                        page.dialogs.commands.loadImageToCanvasUpdate(null, "", avatar.fileUrl);
+
+                        page.dialogs.elements.modalUpdate.modal('show');
+
+                        page.dialogs.elements.errorUpdateArea.empty();
+
+                    } else {
+                        alert('Customer not found');
+                    }
+
+                })
+            });
+        }
+
+    }
+
+
+
+
+    page.dialogs.commands.updateProduct = () => {
+
+        page.elements.loader.removeClass("hide");
+        page.dialogs.elements.btnUpdate.prop('disabled', true);
+
+
+        let formData = new FormData();
+        formData.append("title", page.dialogs.elements.productTitleUP.val().toString());
+        formData.append("price", page.dialogs.elements.productPriceUp.val().toString());
+        formData.append("quantity", page.dialogs.elements.productQuantityUp.val().toString());
+        formData.append("unit", page.dialogs.elements.productUnitUp.val().toString());
+        formData.append("description", page.dialogs.elements.descriptionUp.val().toString());
+        formData.append("categoryId", page.dialogs.elements.categorySelectUpdate.val());
+
+        if (page.dialogs.elements.imageFileUpdate[0].files[0] != null) {
+            formData.append("avatar", page.dialogs.elements.imageFileUpdate[0].files[0]);
+        }
+
+        $.ajax({
+            type: "PATCH",
+            contentType: false,
+            cache: false,
+            processData: false,
+            url: page.url.doUpdate + '/' + productId,
+            data: formData
+        }).done((data) => {
+            product = data;
+            avatar = product.avatar;
+
+            page.commands.replace(productId);
+
+            AppBase.showSuccessAlert(AppBase.SUCCESS_CREATED);
+
+            page.dialogs.elements.modalUpdate.modal('hide');
+
+            page.commands.showUpdateModal();
+
+        }).fail((err) => {
+            console.log(err)
+
+        }).always(function () {
+            page.elements.loader.addClass("hide");
+            page.dialogs.elements.btnUpdate.prop('disabled', false);
+        });
+    }
+
+    page.loadData = () => {
+        page.commands.getAllProducts();
+        
+
+        page.commands.getAllCategories();
+    }
+
+    page.initializeControlEvent = () => {
+        page.dialogs.elements.canvasCre.on('click', () => {
+            page.dialogs.elements.imageFileCre.trigger('click');
+        })
+
+        page.dialogs.elements.imageFileCre.on('change', () => {
+            const imageFile = page.dialogs.elements.imageFileCre[0].files[0]
+            page.dialogs.commands.loadImageToCanvas(imageFile)
+        })
+
+        page.dialogs.elements.btnCreate.on('click', () => {
+            page.dialogs.commands.handleCreateProduct();
+        })
+
+        page.dialogs.elements.imageFileUpdate.on("change", function () {
+            page.dialogs.commands.changeImagePreviewUpdate();
+        });
+
+        page.dialogs.elements.btnUpdate.on("click", function () {
+            page.dialogs.elements.frmUpdateCustomer.trigger('submit');
+        });
+
+
+    }
+
+    $(() => {
+        page.loadData();
+
+        page.initializeControlEvent();
+    })
+</script>
+
+</body>
+
+</html>

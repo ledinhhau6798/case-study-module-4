@@ -1,0 +1,79 @@
+.container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+header .navbar {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.bg-body-navbar {
+    background-color: #1d91e7;
+}
+
+h1.navbar-brand {
+    font-size: 2.5rem;
+    color: #fff;
+}
+
+#tblCustomer thead tr th {
+    background-color: #459d4e;
+    color: #fff;
+}
+
+.show {
+    display: block;
+}
+
+.hide {
+    display: none;
+}
+
+
+
+.error-area {
+    background-color: #ffd8d8;
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+.error-area.show label {
+    display: list-item;
+    color: #be0f0f;
+    margin-left: 20px;
+}
+
+input.error {
+    border-color: red;
+}
+
+
+.product-avatar {
+    width: 80px;
+    height: 60px;
+}
+
+.cart-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.cart-button .count-holder .fa-shopping-cart {
+    font-size: 20px;
+}
+
+.cart-button .box-text {
+    font-size: 14px;
+}
+
+.cart-button .count-holder .count {
+    background-color: red;
+    color: #fff;
+    border-radius: 50%;
+    padding: 0 5px;
+    height: 22px;
+    line-height: 20px;
+    position: absolute;
+}

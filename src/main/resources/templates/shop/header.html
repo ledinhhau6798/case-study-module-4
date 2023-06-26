@@ -1,0 +1,40 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<th:block th:fragment="header">
+    <header>
+        <nav class="navbar navbar-expand-lg bg-body-navbar">
+            <div class="container-fluid">
+                <h1 class="navbar-brand">Market place</h1>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false"
+                        aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarScroll">
+                    <div class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll"
+                         style="--bs-scroll-height: 100px;">
+
+                    </div>
+                    <form class="d-flex" role="search">
+                        <button class="btn btn-outline-light m-3 cart-button" type="button">
+
+                            <span class="count-holder">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="count" id="totalQuantity" th:text="${totalQuantity}">0</span>
+                            </span>
+                            <span class="box-text">Giỏ hàng</span>
+                        </button>
+                        <button class="btn btn-outline-light m-3 " type="button" data-bs-toggle="modal"
+                                data-bs-target="#modalCreateProduct">Create
+                        </button>
+                        <a href="/logout">
+                            <button class="btn btn-outline-light m-3" type="button">Logout
+                            </button>
+                        </a>
+
+                    </form>
+                </div>
+            </div>
+        </nav>
+    </header>
+</th:block>
